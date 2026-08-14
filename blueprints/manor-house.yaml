@@ -456,28 +456,32 @@ steps:
   - name: キッチンのかまど
     op: setblock
     at:
-      - [5, 6, 1]
-      - [6, 6, 1]
+      - [8, 6, 1]
+      - [9, 6, 1]
     block: minecraft:furnace
-    why: 1 階の物置と同じく、階段の列（x=2）を避けて北の壁際に並べる。
+    why: >
+      東の壁際にまとめる。階段は x=2..6 の列を上がって x=6 に着地するので、
+      設備を x=5 あたりに置くと上がった正面が調理台になり、吹抜の縁に
+      かまどが並ぶ形になる。着地点から離すこと。
 
   - name: キッチンの作業台
     op: setblock
     at:
-      - [7, 6, 1]
+      - [10, 6, 1]
     block: minecraft:crafting_table
 
   - name: キッチンの大釜
     op: setblock
     at:
-      - [8, 6, 1]
+      - [11, 6, 1]
     block: minecraft:cauldron
 
   - name: キッチンカウンター
     op: fill
-    from: [9, 6, 1]
-    to:   [9, 6, 3]
+    from: [11, 6, 2]
+    to:   [11, 6, 4]
     block: minecraft:smooth_stone
+    why: 東壁に沿って L 字に折り返す。
 
   - name: ダイニングのカーペット
     op: fill

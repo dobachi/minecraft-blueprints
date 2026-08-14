@@ -95,34 +95,38 @@ steps:
 
   - name: 階段の吹抜（2階の床を抜く）
     op: fill
-    from: [10, 5, 2]
-    to:   [10, 5, 5]
+    from: [2, 5, 1]
+    to:   [2, 5, 4]
     block: minecraft:air
     mode: replace
-    why: 階段を上りきる手前の床を抜かないと、頭がつかえて上がれない。
+    why: >
+      階段を上りきる手前の床を抜かないと、頭がつかえて上がれない。
+
+      階段は北西の奥に置く。入口（北東）の正面に階段を置くと、玄関から直に
+      階上へ抜ける動線になり、居室がただの通路になってしまうため。
 
   - name: 階段の吹抜（3階の床を抜く）
     op: fill
-    from: [10, 10, 2]
-    to:   [10, 10, 5]
+    from: [2, 10, 1]
+    to:   [2, 10, 4]
     block: minecraft:air
     mode: replace
 
   - name: 階段の吹抜（屋上の床を抜く）
     op: fill
-    from: [10, 15, 2]
-    to:   [10, 15, 5]
+    from: [2, 15, 1]
+    to:   [2, 15, 4]
     block: minecraft:air
     mode: replace
 
   - name: 階段 1階→2階
     op: setblock
     at:
-      - [10, 1, 2]
-      - [10, 2, 3]
-      - [10, 3, 4]
-      - [10, 4, 5]
-      - [10, 5, 6]
+      - [2, 1, 1]
+      - [2, 2, 2]
+      - [2, 3, 3]
+      - [2, 4, 4]
+      - [2, 5, 5]
     block: oak_stairs
     state: '["weirdo_direction"=2,"upside_down_bit"=false]'
     why: >
@@ -133,22 +137,22 @@ steps:
   - name: 階段 2階→3階
     op: setblock
     at:
-      - [10, 6, 2]
-      - [10, 7, 3]
-      - [10, 8, 4]
-      - [10, 9, 5]
-      - [10, 10, 6]
+      - [2, 6, 1]
+      - [2, 7, 2]
+      - [2, 8, 3]
+      - [2, 9, 4]
+      - [2, 10, 5]
     block: oak_stairs
     state: '["weirdo_direction"=2,"upside_down_bit"=false]'
 
   - name: 階段 3階→屋上
     op: setblock
     at:
-      - [10, 11, 2]
-      - [10, 12, 3]
-      - [10, 13, 4]
-      - [10, 14, 5]
-      - [10, 15, 6]
+      - [2, 11, 1]
+      - [2, 12, 2]
+      - [2, 13, 3]
+      - [2, 14, 4]
+      - [2, 15, 5]
     block: oak_stairs
     state: '["weirdo_direction"=2,"upside_down_bit"=false]'
 
@@ -248,22 +252,25 @@ steps:
 
   - name: 出入口をくり抜く
     op: fill
-    from: [12, 1, 5]
-    to:   [12, 2, 6]
+    from: [12, 1, 2]
+    to:   [12, 2, 3]
     block: minecraft:air
     mode: replace
+    why: >
+      入口は北東に寄せる。中央（z=5,6）に置くと、1 階を南北に仕切る壁（z=6）の
+      延長線上に玄関が来てしまい、入った正面が壁の切れ目になって落ち着かない。
 
   - name: ドア（北側・ヒンジ左）
     op: setblock
     raw: true
     at:
-      - [12, 1, 5]
+      - [12, 1, 2]
     block: wooden_door
 
   - name: ドア（南側・ヒンジ右）
     op: setblock
     at:
-      - [12, 1, 6]
+      - [12, 1, 3]
     block: wooden_door
     state: '["door_hinge_bit"=true]'
     why: 片方のヒンジを反転しないと観音開きにならない。
@@ -271,8 +278,8 @@ steps:
   - name: 入口の踏み段
     op: setblock
     at:
-      - [13, 0, 5]
-      - [13, 0, 6]
+      - [13, 0, 2]
+      - [13, 0, 3]
     block: oak_stairs
     state: '["weirdo_direction"=1,"upside_down_bit"=false]'
     why: >
@@ -348,21 +355,24 @@ steps:
   - name: 物置のチェスト
     op: setblock
     at:
-      - [2, 1, 2]
-      - [3, 1, 2]
+      - [5, 1, 1]
+      - [6, 1, 1]
     block: minecraft:chest
+    why: >
+      北の壁際に寄せる。階段が x=2 の列を占有するので、家具は x=5 以降に置く
+      （階段を動かしたときに座標が衝突しやすいのはこの列）。
 
   - name: 物置の樽
     op: setblock
     at:
-      - [4, 1, 2]
-      - [5, 1, 2]
+      - [7, 1, 1]
+      - [8, 1, 1]
     block: minecraft:barrel
 
   - name: 物置の本棚
     op: setblock
     at:
-      - [2, 2, 2]
+      - [5, 2, 1]
     block: minecraft:bookshelf
 
   - name: 浴槽の枠
@@ -436,26 +446,27 @@ steps:
   - name: キッチンのかまど
     op: setblock
     at:
-      - [2, 6, 2]
-      - [3, 6, 2]
+      - [5, 6, 1]
+      - [6, 6, 1]
     block: minecraft:furnace
+    why: 1 階の物置と同じく、階段の列（x=2）を避けて北の壁際に並べる。
 
   - name: キッチンの作業台
     op: setblock
     at:
-      - [4, 6, 2]
+      - [7, 6, 1]
     block: minecraft:crafting_table
 
   - name: キッチンの大釜
     op: setblock
     at:
-      - [5, 6, 2]
+      - [8, 6, 1]
     block: minecraft:cauldron
 
   - name: キッチンカウンター
     op: fill
-    from: [6, 6, 2]
-    to:   [8, 6, 2]
+    from: [9, 6, 1]
+    to:   [9, 6, 3]
     block: minecraft:smooth_stone
 
   - name: ダイニングテーブル
@@ -481,33 +492,78 @@ steps:
 
   # ------------------------------------------------------------ 内装 3階
 
-  - name: ベッド
+  - name: 3階の間仕切り（寝室と書斎）
+    op: fill
+    from: [1, 11, 6]
+    to:   [9, 14, 6]
+    block: minecraft:oak_planks
+    why: >
+      1 階と同じ z=6 で仕切り、北を寝室、南を書斎にする。
+      仕切りは x=9 までなので、階段のある x=2 とドアのある x=8 で動線が確保される。
+
+  - name: 3階の間仕切りの入口
+    op: fill
+    from: [8, 11, 6]
+    to:   [8, 12, 6]
+    block: minecraft:air
+    mode: replace
+
+  - name: 書斎のドア
     op: setblock
     raw: true
     at:
-      - [3, 11, 3]
+      - [8, 11, 6]
+    block: wooden_door
+
+  - name: ベッド3台
+    op: setblock
+    raw: true
+    at:
+      - [4, 11, 2]
+      - [6, 11, 2]
+      - [8, 11, 2]
     block: bed
     why: >
       ドアと同じく、片方を置けばもう一方（足側）は自動生成される。
       名前空間を付けない bed で通る。
 
-  - name: ナイトテーブル
-    op: setblock
-    at:
-      - [4, 11, 3]
-    block: minecraft:crafting_table
+      1 台が 2 ブロックを占めるので x を 2 つおきにする。詰めて置くと
+      隣のベッドの足側と衝突して、片方が壊れる。
 
   - name: 寝室のチェスト
     op: setblock
     at:
-      - [5, 11, 3]
+      - [3, 11, 4]
+      - [5, 11, 4]
     block: minecraft:chest
 
-  - name: 寝室の本棚
+  - name: 書斎の本棚（下段）
+    op: fill
+    from: [1, 11, 10]
+    to:   [4, 11, 10]
+    block: minecraft:bookshelf
+
+  - name: 書斎の本棚（上段）
+    op: fill
+    from: [1, 12, 10]
+    to:   [4, 12, 10]
+    block: minecraft:bookshelf
+    why: 2 段積むと書架らしい壁面になる。1 段だけだと腰高の棚に見えて締まらない。
+
+  - name: 書斎の机
     op: setblock
     at:
-      - [7, 11, 3]
-    block: minecraft:bookshelf
+      - [6, 11, 9]
+      - [7, 11, 9]
+    block: minecraft:crafting_table
+
+  - name: 書斎の椅子
+    op: setblock
+    at:
+      - [6, 11, 8]
+    block: oak_stairs
+    state: '["weirdo_direction"=2,"upside_down_bit"=false]'
+    why: 机（z=9）に向かうよう南向きに置く。
 
   # -------------------------------------------------------------- 屋上設備
 

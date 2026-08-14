@@ -647,14 +647,38 @@ steps:
 
   # -------------------------------------------------------------- 屋上設備
 
+  - name: 屋上の吹抜まわりの手すり（北）
+    op: fill
+    from: [2, 16, 1]
+    to:   [5, 16, 1]
+    block: minecraft:oak_fence
+    why: >
+      屋上の吹抜は床に開いた穴なので、囲わないと 3 階まで落ちる。外周の柵だけでは
+      足りない。階段が上がってくる東側（x=6）は出入口として開けておく。
+
+  - name: 屋上の吹抜まわりの手すり（南）
+    op: fill
+    from: [2, 16, 3]
+    to:   [5, 16, 3]
+    block: minecraft:oak_fence
+
+  - name: 屋上の吹抜まわりの手すり（西）
+    op: setblock
+    at:
+      - [1, 16, 2]
+    block: minecraft:oak_fence
+
   - name: 屋上のベンチ
     op: setblock
     at:
-      - [3, 16, 3]
-      - [4, 16, 3]
-      - [5, 16, 3]
+      - [6, 16, 7]
+      - [7, 16, 7]
+      - [8, 16, 7]
     block: oak_stairs
     state: '["weirdo_direction"=2,"upside_down_bit"=false]'
+    why: >
+      焚き火（z=6）の南側に、火の方を向けて並べる。
+      当初は吹抜の縁（z=3）に置いていたが、座った背後が穴になるので移した。
 
   - name: BBQ の焚き火
     op: setblock

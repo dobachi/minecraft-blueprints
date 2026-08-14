@@ -149,20 +149,25 @@ function expandStep(step, anchor, index) {
       if (!Array.isArray(positions) || positions.length === 0) {
         die(`${label}: "at" must be a non-empty list of [x,y,z] triples`);
       }
+      // A block state can only be expressed through a raw command — the set_block
+      // tool takes a bare id — so declaring `state` implies `raw`.
+      // Bedrock wants it space-separated: setblock <x> <y> <z> <block> ["k"=v]
+      const state = step.state ? ` ${step.state}` : "";
+      const useRaw = Boolean(step.raw || step.state);
+
       positions.forEach((rel, i) => {
         if (!isTriple(rel)) {
           die(`${label}: at[${i}] must be three integers, got ${JSON.stringify(rel)}`);
         }
         const [x, y, z] = toWorld(anchor, rel);
+        const cmd = `setblock ${x} ${y} ${z} ${bare(step.block)}${state}`;
         ops.push({
           label: positions.length > 1 ? `${label} (${i + 1}/${positions.length})` : label,
-          // Blocks needing state (doors and the like) must go through a raw command;
-          // the set_block tool takes an id only.
-          tool: step.raw ? "world" : "blocks",
-          args: step.raw
-            ? { action: "run_command", command: `setblock ${x} ${y} ${z} ${bare(step.block)}` }
+          tool: useRaw ? "world" : "blocks",
+          args: useRaw
+            ? { action: "run_command", command: cmd }
             : { action: "set_block", x, y, z, block_id: step.block },
-          command: `setblock ${x} ${y} ${z} ${bare(step.block)}`,
+          command: cmd,
         });
       });
       break;

@@ -381,6 +381,56 @@ steps:
       床と同じ高さ（y=0）に水を置くことで、床に埋め込まれた浴槽になる。
       床の上（y=1）に置くと部屋が水浸しになるので高さを間違えないこと。
 
+  - name: 浴槽の縁（北）
+    op: fill
+    from: [3, 1, 7]
+    to:   [6, 1, 7]
+    block: minecraft:quartz_block
+    why: >
+      縁を 1 段立ち上げないと、ただ床に水たまりがあるようにしか見えない。
+      水面の高さは変えず、周囲だけを囲うのが浴槽らしく見せるコツ。
+
+  - name: 浴槽の縁（南）
+    op: fill
+    from: [3, 1, 11]
+    to:   [6, 1, 11]
+    block: minecraft:quartz_block
+
+  - name: 浴槽の縁（西）
+    op: fill
+    from: [3, 1, 8]
+    to:   [3, 1, 10]
+    block: minecraft:quartz_block
+
+  - name: 浴槽の縁（東）
+    op: fill
+    from: [6, 1, 8]
+    to:   [6, 1, 10]
+    block: minecraft:quartz_block
+
+  - name: 風呂場の間仕切り
+    op: fill
+    from: [1, 1, 6]
+    to:   [9, 4, 6]
+    block: minecraft:oak_planks
+    why: >
+      物置と地続きだと浴室に見えない。1 階を南北に仕切って独立した部屋にする。
+      階段室のある x=10 の列は塞がないので、動線は確保される。
+
+  - name: 風呂場の入口をくり抜く
+    op: fill
+    from: [8, 1, 6]
+    to:   [8, 2, 6]
+    block: minecraft:air
+    mode: replace
+
+  - name: 風呂場のドア
+    op: setblock
+    raw: true
+    at:
+      - [8, 1, 6]
+    block: wooden_door
+
   # ------------------------------------------------------------ 内装 2階
 
   - name: キッチンのかまど

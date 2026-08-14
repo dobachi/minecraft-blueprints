@@ -1,0 +1,161 @@
+name: starter-house
+version: 1
+description: 9x9 の木造小屋。窓・天井照明・両開きドア・入口階段つき。
+author: dobachi
+
+# すべての座標はアンカーからの相対値。実行時に --at <x> <y> <z> で絶対座標へ展開する。
+anchor:
+  description: 建物の北西角、床レベル（床ブロックそのものの高さ）
+  # 例: --at 24 65 -258 とすると、相対 [0,0,0] が絶対 (24, 65, -258) になる
+
+# 占有範囲（相対）。整地や干渉チェックの目安に使う。
+bounds:
+  min: [0, -2, 0]
+  max: [10, 6, 8]
+
+# 建てる前に確認すべきこと。実行器は検証しないので、人間/AI が見る。
+preconditions:
+  - アンカー周辺の地形高低差が 2 ブロック以内であること（基礎の keep 充填で吸収できる範囲）
+  - 他人の建造物の上に重ねないこと（マルチプレイでは持ち主の許可を取る）
+  - 入口は +X 側（東）に開く。その方向に 2 ブロック分の余地が必要
+
+steps:
+  - name: 敷地クリア
+    op: fill
+    from: [0, 0, 0]
+    to:   [8, 6, 8]
+    block: minecraft:air
+    mode: replace
+    why: >
+      最初に建築範囲全体を空にする。これを省くと木の葉・草・花が室内に residual として
+      残る。実測で 31 ブロックが室内に取り残された。hollow モードは外殻を置くだけで
+      内部の既存ブロックには触れないため、この工程は hollow の前に必須。
+
+  - name: 基礎
+    op: fill
+    from: [0, -2, 0]
+    to:   [8, -1, 8]
+    block: minecraft:stone
+    mode: keep
+    why: >
+      keep は空気の部分だけを埋める。斜面の低い側にできる床下の空隙を埋めて建物が
+      宙に浮くのを防ぎつつ、既存の地面は削らない。replace にすると地形を破壊する。
+
+  - name: 本体外殻
+    op: cube
+    from: [0, 0, 0]
+    to:   [8, 5, 8]
+    block: minecraft:oak_planks
+    hollow: true
+    why: 床・壁・天井を一度に生成する。内部は「敷地クリア」で既に空。
+
+  - name: 角柱（北西）
+    op: fill
+    from: [0, 1, 0]
+    to:   [0, 4, 0]
+    block: minecraft:dark_oak_log
+
+  - name: 角柱（北東）
+    op: fill
+    from: [8, 1, 0]
+    to:   [8, 4, 0]
+    block: minecraft:dark_oak_log
+
+  - name: 角柱（南西）
+    op: fill
+    from: [0, 1, 8]
+    to:   [0, 4, 8]
+    block: minecraft:dark_oak_log
+
+  - name: 角柱（南東）
+    op: fill
+    from: [8, 1, 8]
+    to:   [8, 4, 8]
+    block: minecraft:dark_oak_log
+
+  - name: 屋根
+    op: fill
+    from: [0, 6, 0]
+    to:   [8, 6, 8]
+    block: minecraft:stone_bricks
+    mode: replace
+    why: >
+      木の天井の上に石レンガを一層重ねる。外周だけの縁取りにしようと outline モードを
+      使うと、単層に適用した場合は全面が「外殻」と判定されて 9x9 全部が埋まる。
+      枠を作りたいときは outline を単層に使わず、四辺を個別に fill すること。
+
+  - name: 窓（北面）
+    op: fill
+    from: [2, 2, 0]
+    to:   [6, 3, 0]
+    block: minecraft:glass
+
+  - name: 窓（南面）
+    op: fill
+    from: [2, 2, 8]
+    to:   [6, 3, 8]
+    block: minecraft:glass
+
+  - name: 窓（西面）
+    op: fill
+    from: [0, 2, 2]
+    to:   [0, 3, 6]
+    block: minecraft:glass
+
+  - name: 出入口をくり抜く
+    op: fill
+    from: [8, 1, 3]
+    to:   [8, 2, 4]
+    block: minecraft:air
+    mode: replace
+    why: 高さ 2・幅 2。ドアは高さ 2 なので、それ以上開けるとドアの上に隙間が残る。
+
+  - name: 天井ライト
+    op: setblock
+    at:
+      - [2, 5, 2]
+      - [6, 5, 2]
+      - [2, 5, 6]
+      - [6, 5, 6]
+      - [4, 5, 4]
+    block: minecraft:sea_lantern
+    why: >
+      天井面に埋め込むので頭がぶつからない。sea_lantern は明るさ 15 で、
+      この 5 点配置なら 9x9 全体が湧き潰しできる明るさになる。
+
+  - name: ドア（下半分）
+    op: setblock
+    raw: true
+    at:
+      - [8, 1, 3]
+      - [8, 1, 4]
+    block: wooden_door
+    why: >
+      オークのドアの ID は oak_door ではなく wooden_door。他の木材は spruce_door の
+      ように <木材>_door だが、オークだけ例外。oak_door を指定すると
+      「構文エラー: "oak_door" は無効です」になる。名前空間 minecraft: は付けない。
+
+      下半分を置けば上半分は自動生成される（実機で確認済み）。逆に
+      ["upper_block_bit"=true] を明示すると statusCode -2147352576 で失敗するので、
+      上半分を自分で置いてはいけない。2 枚並べると両開き扉として機能する。
+
+  - name: 入口の階段（上段）
+    op: fill
+    from: [9, 0, 3]
+    to:   [9, 0, 4]
+    block: minecraft:oak_planks
+
+  - name: 入口の階段（下段）
+    op: fill
+    from: [10, -1, 3]
+    to:   [10, -1, 4]
+    block: minecraft:oak_planks
+    why: >
+      室内の床面と外の地面には高低差がある。段差 2 以上はジャンプで越えられないため、
+      1 ブロックずつ上がる踏み段が必要。段数は設置場所の地形に応じて調整すること。
+
+todo:
+  - 屋根を平屋根から傾斜屋根（階段ブロック）に変える案。向き指定の検証が必要。
+  - >
+    階段の段数を地形から自動決定したい。現状は東側の地面 y=63 を前提に 2 段固定なので、
+    平坦地に建てると宙に浮いた踏み段になる。

@@ -1,0 +1,16 @@
+{
+  "name": "minecraft-blueprints",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable Minecraft Bedrock build definitions in relative coordinates, expanded to a concrete plan at an anchor point.",
+  "scripts": {
+    "plan": "node scripts/build-plan.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,18 @@
+node_modules/
+*.log
+
+# 生成した実行計画（再生成できるので追跡しない）
+plans/
+*.plan.json
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# Claude Code のローカル状態
+.claude/
+.mcp.json

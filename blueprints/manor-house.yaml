@@ -474,26 +474,88 @@ steps:
     to:   [9, 6, 3]
     block: minecraft:smooth_stone
 
+  - name: ダイニングのカーペット
+    op: fill
+    from: [3, 6, 6]
+    to:   [7, 6, 10]
+    block: minecraft:red_carpet
+    why: >
+      2 階は仕切りがなくキッチンと地続きなので、床材でダイニングのゾーンを分ける。
+      必ず家具より先に敷くこと。後から敷くとテーブルや椅子を上書きしてしまう。
+
   - name: ダイニングテーブル
     op: fill
     from: [4, 6, 8]
     to:   [6, 6, 8]
     block: minecraft:oak_planks
 
-  - name: ダイニングの椅子（西側）
+  - name: ダイニングの椅子（西）
     op: setblock
     at:
       - [3, 6, 8]
     block: oak_stairs
     state: '["weirdo_direction"=1,"upside_down_bit"=false]'
-    why: 階段ブロックを椅子に使う。座面がテーブルを向くよう向きを決める。
+    why: >
+      階段ブロックを椅子にする。背もたれ（高い側）が外を向くように置く。
+      weirdo_direction は「高い側が向く方角」で 0=東 1=西 2=南 3=北。
+      4 方向すべて実機で確認済み。
 
-  - name: ダイニングの椅子（東側）
+  - name: ダイニングの椅子（東）
     op: setblock
     at:
       - [7, 6, 8]
     block: oak_stairs
     state: '["weirdo_direction"=0,"upside_down_bit"=false]'
+
+  - name: ダイニングの椅子（北）
+    op: setblock
+    at:
+      - [5, 6, 7]
+    block: oak_stairs
+    state: '["weirdo_direction"=3,"upside_down_bit"=false]'
+
+  - name: ダイニングの椅子（南）
+    op: setblock
+    at:
+      - [5, 6, 9]
+    block: oak_stairs
+    state: '["weirdo_direction"=2,"upside_down_bit"=false]'
+
+  - name: テーブルのケーキ
+    op: setblock
+    at:
+      - [5, 7, 8]
+    block: minecraft:cake
+    why: 天板の上に 1 つ置くだけで食卓に見える。
+
+  - name: 吊り下げ照明の鎖
+    op: setblock
+    at:
+      - [5, 9, 8]
+    block: minecraft:chain
+
+  - name: 吊り下げ照明のランタン
+    op: setblock
+    at:
+      - [5, 8, 8]
+    block: lantern
+    state: '["hanging"=true]'
+    why: >
+      hanging=true を付けないと床置きの形になる。天井に埋めたシーランタンだけでは
+      光源が意匠にならないので、テーブル上に吊るして視線の中心をつくる。
+
+  - name: 窓辺の鉢植え
+    op: setblock
+    at:
+      - [3, 6, 11]
+      - [7, 6, 11]
+    block: minecraft:flower_pot
+
+  - name: ダイニングの樽
+    op: setblock
+    at:
+      - [9, 6, 10]
+    block: minecraft:barrel
 
   # ------------------------------------------------------------ 内装 3階
 

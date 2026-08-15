@@ -1,0 +1,144 @@
+name: manor-house-furniture
+version: 1
+description: >
+  manor-house に Another Furniture Add-On の家具を上書きする追加パック。
+  バニラのブロックで代用していた椅子・テーブル・ベンチを本物の家具に差し替え、
+  ソファ・引き出し・棚を足す。
+author: dobachi
+
+anchor:
+  description: >
+    manor-house と同じアンカー（建物の北西角・1 階の床レベル）を指定する。
+    座標系を共有しているので、manor-house を --at X Y Z で建てたなら
+    このパックも同じ --at X Y Z で適用する。
+
+bounds:
+  min: [0, 0, 0]
+  max: [12, 17, 12]
+
+preconditions:
+  - >
+    **Another Furniture Add-On (Starfish Studios) が有効なワールドであること。**
+    無効なワールドでは sf_afm:* が「構文エラー」で弾かれ、家具が一つも置かれない。
+    その場合は manor-house をそのまま使うこと。
+  - 同じアンカーで manor-house が建っていること。このパックは上書き専用で、躯体は作らない。
+
+# 家具 ID の規約（実機で確認したもの）
+#
+#   sf_afm:<家具>_<0..11>.block      末尾の数字は木材の色（12 種）
+#
+#   確認できた家具: chair / bench_single / table / sofa / drawer / shelf
+#   存在しなかった: nightstand / kitchen_counter / curtain / bench_left / bench_right
+#
+#   向き: ["minecraft:cardinal_direction"="north"|"south"|"east"|"west"]
+#         指定するのは【背面が向く方向】。座らせたい向きの反対を書く。既定は south。
+#
+# 番号 0 はオーク相当。建物が oak_planks なので全て 0 で揃えている。
+
+steps:
+  # ---------------------------------------------------------- 2階 ダイニング
+
+  - name: ダイニングテーブルを家具に差し替え
+    op: setblock
+    raw: true
+    at:
+      - [4, 6, 8]
+      - [5, 6, 8]
+      - [6, 6, 8]
+    block: sf_afm:table_0.block
+    why: >
+      バニラでは oak_planks を並べて天板にしていた。テーブルは向きを持たないので
+      cardinal_direction は不要。
+
+  - name: ダイニングの椅子（西）
+    op: setblock
+    at:
+      - [3, 6, 8]
+    block: sf_afm:chair_0.block
+    state: '["minecraft:cardinal_direction"="west"]'
+    why: >
+      テーブル（東）を向かせたいので、背面が向く西を指定する。
+      直感と逆なので注意。バニラ階段を椅子代わりにしていたときとは値が反転する。
+
+  - name: ダイニングの椅子（東）
+    op: setblock
+    at:
+      - [7, 6, 8]
+    block: sf_afm:chair_0.block
+    state: '["minecraft:cardinal_direction"="east"]'
+
+  - name: ダイニングの椅子（北）
+    op: setblock
+    at:
+      - [5, 6, 7]
+    block: sf_afm:chair_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+
+  - name: ダイニングの椅子（南）
+    op: setblock
+    at:
+      - [5, 6, 9]
+    block: sf_afm:chair_0.block
+    state: '["minecraft:cardinal_direction"="south"]'
+
+  # ------------------------------------------------------------ 2階 キッチン
+
+  - name: キッチンの棚
+    op: setblock
+    at:
+      - [8, 7, 1]
+    block: sf_afm:shelf_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+    why: かまどの上、北の壁際に掛ける。部屋側（南）を向かせるので背面は北。
+
+  # ---------------------------------------------------------- 3階 寝室・書斎
+
+  - name: 寝室の引き出し
+    op: setblock
+    at:
+      - [7, 11, 5]
+    block: sf_afm:drawer_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+    why: ベッドの足元側に置く。正面を部屋の中央（南）に向けるので背面は北。
+
+  - name: 書斎の椅子
+    op: setblock
+    at:
+      - [6, 11, 8]
+    block: sf_afm:chair_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+    why: 机（z=9、南隣）に向かわせるので背面は北。
+
+  - name: 書斎のソファ
+    op: setblock
+    at:
+      - [2, 11, 8]
+    block: sf_afm:sofa_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+    why: >
+      本棚（南壁）の方を向けて読書スペースにする。書斎の西側が空いているので
+      そこに据える。
+
+  # ---------------------------------------------------------------- 屋上
+
+  - name: 屋上のベンチ
+    op: setblock
+    at:
+      - [6, 16, 7]
+      - [7, 16, 7]
+      - [8, 16, 7]
+    block: sf_afm:bench_single_0.block
+    state: '["minecraft:cardinal_direction"="south"]'
+    why: >
+      焚き火（z=6、北隣）を囲ませたいので背面は south。
+      連結用の bench_left / bench_middle / bench_right は存在せず single のみ。
+      隣接させれば見た目は繋がる。
+
+todo:
+  - >
+    未確認の家具名がまだある。ゲーム内で `/setblock ~ ~ ~ sf_afm:` まで打って
+    Tab を押すと全リストが見られる。stool / cabinet / desk / lamp / clock などが
+    あればキッチンと書斎をさらに充実させられる。
+  - >
+    木材番号と色の対応が未特定。0 をオーク相当として全て 0 で揃えているが、
+    12 色それぞれが何の木材かは実機で並べて確認するのが早い。

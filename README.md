@@ -118,7 +118,22 @@ todo:              # 未解決の課題
 | 名前 | 内容 | 規模 |
 | --- | --- | --- |
 | `starter-house` | 9x9 の木造小屋。窓・天井照明・両開きドア・入口階段 | 約 440 ブロック / 23 操作 |
-| `manor-house` | 13x13 の 3 階建て + 屋上テラス。物置・風呂・キッチン・ダイニング・寝室・BBQ、内部階段で全階接続 | 約 2,300 ブロック / 85 操作 |
+| `manor-house` | 13x13 の 3 階建て + 屋上テラス。物置・風呂・キッチン・ダイニング・寝室・BBQ、内部階段で全階接続 | 約 2,300 ブロック / 113 操作 |
+| `manor-house-furniture` | 上に重ねる家具パック。**Another Furniture Add-On が必要** | 14 操作 |
+
+### 追加パックの重ね方
+
+`manor-house-furniture` は躯体を作らず、家具だけを上書きする差分パックです。
+**本体と同じアンカー**を指定して、本体のあとに適用します。
+
+```bash
+node scripts/build-plan.js blueprints/manor-house.yaml           --at -117 69 -604
+node scripts/build-plan.js blueprints/manor-house-furniture.yaml --at -117 69 -604
+```
+
+本体をコピーして家具入りの別ファイルを作ると、本体を直すたびに二重に直すことに
+なるので分けています。アドオンのないワールドでは本体だけを使ってください
+（`sf_afm:*` は構文エラーになり、家具が一つも置かれません）。
 
 ## 関連
 

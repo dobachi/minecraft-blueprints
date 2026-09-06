@@ -1,0 +1,74 @@
+name: archery-range
+version: 1
+description: >
+  的当ての射場。射撃位置の目印、的、矢止めの壁だけの最小構成。
+  距離 16 ブロック。的は 1 つしか置かない（理由は preconditions を見ること）。
+author: dobachi
+
+anchor:
+  description: 的の足元、地表ブロックそのものの高さ（的はこの 2 つ上に立つ）
+  # 例: --at 108 127 -143 とすると、相対 [0,0,0] が絶対 (108, 127, -143) になる
+
+bounds:
+  min: [-1, 0, -2]
+  max: [17, 4, 2]
+
+preconditions:
+  - 射線（+X 方向に 16 ブロック）の地表が同じ高さで平坦であること
+  - >
+    **的は 1 つに留めること。** TargetBlockHit イベントは「誰が撃ったか」と
+    redstoneLevel しか持たず、**どの的に当たったかを含まない**。複数置くと
+    命中を区別できず、得点を分けられない。
+  - >
+    建物や他人の造作の方向へ射線を向けないこと。矢止めの壁を越えた矢は飛んでいく。
+  - >
+    命中を拾うには MCP サーバが TargetBlockHit を購読している必要がある
+    （minecraft-claude のフォーク 90b003a 以降）。購読は接続確立時に確定するので、
+    サーバを入れ替えたら Minecraft から /connect をやり直すこと。
+
+steps:
+  - name: 矢止めの壁
+    op: fill
+    from: [-1, 1, -2]
+    to:   [-1, 4, 2]
+    block: minecraft:stone_bricks
+    mode: replace
+    why: >
+      的の 1 つ後ろに立てる。外した矢が回収できない場所へ飛ぶのを防ぐ。
+      幅 5・高さ 4 あれば、16 ブロックの距離からの外れ矢はおおむね受け止まる。
+
+  - name: 的の支柱
+    op: setblock
+    at:
+      - [0, 1, 0]
+    block: minecraft:stone_bricks
+    why: 的を目の高さまで上げる。地面に直接置くと足元を狙う姿勢になって射にくい。
+
+  - name: 的
+    op: setblock
+    raw: true
+    at:
+      - [0, 2, 0]
+    block: target
+    why: >
+      ID は target（「的」）。命中すると redstoneLevel が返り、中心ほど大きい。
+      実測では 8 / 11 / 14 のように離散値で、同心円のリングごとに決まる。
+      中心が 15、外縁が 1 前後。連続値ではないので、得点はこの粒度になる。
+
+  - name: 射撃位置の目印
+    op: fill
+    from: [16, 0, -1]
+    to:   [16, 0, 1]
+    block: minecraft:smooth_stone
+    mode: replace
+    why: >
+      地表ブロックを差し替えて足場を示す。距離 16 ブロックは、弓の適度な
+      山なりが要る程度で、当たりはするが中心は狙いにくい塩梅だった。
+
+todo:
+  - >
+    的を複数にして狙い分けたい場合、イベントだけでは区別できない。
+    射手の位置と向きから推測するか、的ごとに時間で切り替えるなどの工夫が要る。
+  - >
+    距離ボーナスが未実装。TargetBlockHit は射手の座標を持つので、
+    的からの距離を測って加点に反映できる。

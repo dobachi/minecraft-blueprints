@@ -1,0 +1,183 @@
+name: cat-house
+version: 1
+description: >
+  5x5 の 3 階建て。梯子で 1 階から 3 階まで一本で上がれる。
+  猫を飼うための小屋として建てたので、入口にドアを付けて出入りを塞げるようにしてある。
+  3 階はソファとテーブルの居間。
+author: dobachi
+
+anchor:
+  description: 建物の北西角、床レベル（1 階の床ブロックそのものの高さ）
+  # 例: --at 133 127 -139 とすると、相対 [0,0,0] が絶対 (133, 127, -139) になる
+
+bounds:
+  min: [0, -2, 0]
+  max: [4, 12, 4]
+
+preconditions:
+  - アンカー周辺の地形高低差が 2 ブロック以内であること（基礎の keep 充填で吸収できる範囲）
+  - 入口は -X 側（西）に開く。その方向に 2 ブロック分の余地が必要
+  - >
+    家具ステップ（ソファ・テーブル）は **Another Furniture Add-On (Starfish Studios)**
+    が有効なワールドでのみ通る。無効なら sf_afm:* が「構文エラー」で弾かれるので、
+    その 2 ステップを飛ばすか、クォーツの階段で代用する。
+  - >
+    猫を住まわせる場合、召喚は **地表 +1** に行うこと。`player get_location` の y は
+    空きスペースを意味せず、そのまま使うと地中に湧いて窒息する（実測で 1 匹失った）。
+
+# 階層（相対 y）
+#
+#   1F 床 0 / 内部 1-3      2F 床 4 / 内部 5-7      3F 床 8 / 内部 9-11      屋根 12
+#
+# 各階の内高は 3。梯子は南東の隅（相対 [3, *, 3]）を垂直に貫く。
+
+steps:
+  - name: 敷地クリア
+    op: fill
+    from: [0, 0, 0]
+    to:   [4, 12, 4]
+    block: minecraft:air
+    mode: replace
+    why: >
+      hollow は外殻を置くだけで内部の既存ブロックに触れないため、先に空にしておく。
+      草地に建てると室内に草が残る。
+
+  - name: 基礎
+    op: fill
+    from: [0, -2, 0]
+    to:   [4, -1, 4]
+    block: minecraft:stone
+    mode: keep
+    why: >
+      keep は空気の部分だけを埋める。斜面の低い側にできる床下の空隙を埋めて建物が
+      宙に浮くのを防ぎつつ、既存の地面は削らない。
+      初出の実機（平坦地）ではこの工程を省いたが、再利用のために入れてある。
+
+  - name: 本体外殻
+    op: cube
+    from: [0, 0, 0]
+    to:   [4, 12, 4]
+    block: minecraft:oak_planks
+    hollow: true
+    why: 1 階の床・四方の壁・屋根を一度に生成する。中間の床は含まれないので次で張る。
+
+  - name: 2 階の床
+    op: fill
+    from: [1, 4, 1]
+    to:   [3, 4, 3]
+    block: minecraft:oak_planks
+    mode: replace
+    why: 外殻の hollow は中間床を作らない。内部 3x3 だけを張れば周囲は壁が受ける。
+
+  - name: 3 階の床
+    op: fill
+    from: [1, 8, 1]
+    to:   [3, 8, 3]
+    block: minecraft:oak_planks
+    mode: replace
+
+  - name: 梯子（1 階から 3 階まで貫通）
+    op: fill
+    raw: true
+    from: [3, 1, 3]
+    to:   [3, 11, 3]
+    block: ladder
+    state: '["facing_direction"=4]'
+    why: >
+      facing_direction=4 は西向き。東壁（相対 x=4）に背を付けて接地する。
+      **床を張ったあとに通すこと。** この fill が [3,4,3] と [3,8,3] の床を梯子で
+      置き換えるので、穴を別途くり抜く必要はない。順序を逆にすると床が梯子を潰す。
+
+      向きの値は実機で 1 本だけ置いて testforblock で確かめてから残りを流した。
+      値を間違えると壁に付かず、ブロック更新で剥がれ落ちる。
+
+  - name: 出入口をくり抜く
+    op: fill
+    from: [0, 1, 2]
+    to:   [0, 2, 2]
+    block: minecraft:air
+    mode: replace
+    why: 高さ 2・幅 1。ドアは高さ 2 なので、それ以上開けるとドアの上に隙間が残る。
+
+  - name: ドア
+    op: setblock
+    raw: true
+    at:
+      - [0, 1, 2]
+    block: wooden_door
+    state: '["direction"=2,"door_hinge_bit"=false,"open_bit"=false]'
+    why: >
+      オークのドアの ID は oak_door ではなく wooden_door。oak_door は「構文エラー」で
+      弾かれる。下半分を置けば上半分は自動生成される（明示すると失敗する）。
+
+      **猫を閉じ込める目的ならドアは必須。** 実機ではドアの設置に一度失敗した状態で
+      猫を入れてしまい、空いた入口から逃げられた。設置後に testforblock で
+      実在を確かめること。猫はドアを開けられないので、閉めてあれば出られない。
+
+  - name: 各階の天井照明
+    op: setblock
+    at:
+      - [2, 4, 2]
+      - [2, 8, 2]
+      - [2, 12, 2]
+    block: minecraft:glowstone
+    why: 中間床と屋根の中央を光源に差し替える。天井面なので頭がぶつからない。
+
+  - name: 窓（1 階）
+    op: setblock
+    at:
+      - [4, 2, 2]
+      - [2, 2, 4]
+    block: minecraft:glass
+
+  - name: 窓（2 階・東西）
+    op: setblock
+    at:
+      - [0, 6, 2]
+      - [4, 6, 2]
+    block: minecraft:glass
+
+  - name: 窓（3 階・東西）
+    op: setblock
+    at:
+      - [0, 10, 2]
+      - [4, 10, 2]
+    block: minecraft:glass
+
+  - name: ソファ（3 階・北壁沿い）
+    op: setblock
+    raw: true
+    at:
+      - [1, 9, 1]
+      - [2, 9, 1]
+      - [3, 9, 1]
+    block: sf_afm:sofa_0.block
+    state: '["minecraft:cardinal_direction"="north"]'
+    why: >
+      cardinal_direction は【背面が向く方向】。北壁に背を付けて南（部屋の中）を
+      向かせるので north を指定する。末尾の 0 は木材の色でオーク相当、壁と揃えている。
+
+  - name: テーブル（3 階・ソファの正面）
+    op: setblock
+    raw: true
+    at:
+      - [2, 9, 2]
+    block: sf_afm:table_0.block
+    why: >
+      テーブルは向きを持たないので cardinal_direction は不要。
+      初出の実機では色を確かめずに table_11 を置いた。末尾は木材の色なので、
+      オークの躯体に合わせるなら 0 が正しい。
+
+todo:
+  - >
+    ソファの向きが未検証。初出の実機ではプレイヤーが手で置いた 1 つを clone で
+    左右に複製したため、cardinal_direction を明示していない。
+    このブループリントの north 指定は PITFALLS の規約から導いたもので、実機未確認。
+  - >
+    clone で複製したソファと手で置いたソファで見た目に差が出るかが未確認。
+    差が出るなら clone は状態を落としていることになるので、複製ではなく
+    setblock で置くようにこの todo を消すこと。
+  - >
+    3 階の居間が 3x3 で、ソファ 3 つとテーブルで床がほぼ埋まる。
+    梯子の着地点（相対 [3,9,3]）だけが空いている状態なので、
+    住居として使うなら 7x7 に広げるか、家具を 2 つに減らす。

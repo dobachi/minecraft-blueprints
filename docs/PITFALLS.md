@@ -147,6 +147,66 @@ setblock <x> <y> <z> sf_afm:chair_0.block ["minecraft:cardinal_direction"="west"
 `red_carpet` `white_carpet` のように色名込みの ID を使う。
 床の装飾は**家具より先に敷く**こと。後から fill するとテーブルや椅子を上書きする。
 
+## 実行結果の確認
+
+### sequence は各ステップの statusCode を返さない
+
+`world sequence` / `blocks sequence` の要約は各ステップを "Command executed" としか
+書かず、**`statusCode` を含めない**。中で構文エラーが起きても成功に見える。
+
+実測で 2 回踏んだ。1 回目は `oak_door` という無効 ID でのドア設置が黙って失敗し、
+入口が空いたままになって猫に逃げられた。2 回目は召喚位置の誤りに気づけなかった。
+
+**対策**: ワールドを変更するコマンド（`setblock` / `summon` / `tp` / `fill`）は
+`sequence` にまとめず**1 つずつ呼んで `statusCode: 0` を確認する**。
+往復数の最小化より優先する。失敗を検出できない往復削減は割に合わない。
+`sequence` にまとめてよいのは読み取り系と `send_message` だけ。
+
+### `wasSpawned: true` は生存を意味しない
+
+`summon` の戻り値はコマンドが通ったことしか示さない。**地中に召喚すると直後に窒息して
+消える**が、戻り値は成功のままになる。
+
+実測: 猫を `player get_location` が返した y にそのまま召喚したところ、そこは地表の
+草ブロック**そのもの**の高度で、猫は中に埋まって死んだ。`testfor @e[type=cat]` で
+「セレクターに合う対象がありません」と出て初めて気づいた。
+
+**対策**: エンティティは `get_top_solid_block` で地表 y を取り、**その +1** に出す。
+置いたあとは範囲指定の `testfor` で実在を確かめる。
+
+```
+testfor @e[type=cat,x=134,y=128,z=-138,dx=2,dy=2,dz=2]
+```
+
+## 家具アドオンの ID を現物から読む
+
+`/setblock ~ ~ ~ sf_afm:` まで打てばコマンド補完で一覧が出るが、**既に置いてある
+ブロックの名前**を知りたいときは `testforblock` の不一致メッセージが使える。
+
+```
+testforblock 135 136 -138 air
+  → 135,136,-138 にあるブロックは tile.sf_afm:sofa_0.block.name です (予想では 空気)
+```
+
+`tile.` と `.name` を除いた `sf_afm:sofa_0.block` が ID。
+**末尾の `.block` は識別子の一部**で、拡張子ではない。実測でここを削って
+`sf_afm:sofa_0` にしたところ、`setblock` も `testforblock` も構文エラーになった。
+
+なお `blocks query_block_data` でも読めるが、**単一座標で約 94,000 トークン**返すので
+使ってはいけない。
+
+### ID が分からないブロックは clone で複製できる
+
+`clone` はブロック名を取らないので、ID が判明していないアドオンブロックでも
+複製できる。ユーザが手で置いた 1 つを左右に増やす、といった使い方ができる。
+
+```
+clone 135 136 -138 135 136 -138 134 136 -138
+```
+
+ただし**ブロック状態が保たれるかは未検証**。向きを持つ家具では、正しい ID を
+特定して `setblock` で置く方が確実。
+
 ## 読み取り
 
 ### get_top_solid_block の y は「探索の開始高度」

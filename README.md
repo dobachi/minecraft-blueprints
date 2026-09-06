@@ -135,6 +135,23 @@ node scripts/build-plan.js blueprints/manor-house-furniture.yaml --at -117 69 -6
 なるので分けています。アドオンのないワールドでは本体だけを使ってください
 （`sf_afm:*` は構文エラーになり、家具が一つも置かれません）。
 
+## どこに建てたかの記録
+
+`blueprints/` は設計図で、絶対座標を持たない。実際にどのワールドのどこへ建てたかは
+`placements/<slug>.yaml` に記録する。
+
+```yaml
+world:
+  name: 新もち鯖
+placements:
+  - blueprint: cat-house
+    anchor: [133, 127, -139]
+    built: 2026-09-05
+```
+
+ワールド名は socket-be から取れない（`World #0` という接続順のラベルが返るだけ）ので、
+ユーザが付けている名前を手で書く。
+
 ## 関連
 
 - [docs/PITFALLS.md](docs/PITFALLS.md) — 実機で踏んだ落とし穴と回避策
